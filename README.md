@@ -1,4 +1,4 @@
-#Mizar S
+# Mizar S
 
 This code is suitable for Geeetech Mizar S 3D printer, we provide MarlinV2.0.7 version, only suitable for Mizar S original screen.
 
