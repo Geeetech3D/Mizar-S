@@ -1,3 +1,5 @@
+#Mizar S
+
 This code is suitable for Geeetech Mizar S 3D printer, we provide MarlinV2.0.7 version, only suitable for Mizar S original screen.
 
 In addition, we have also made Mizar S UI open source. It’s available to customize your own fonts and icons or modify them into your favorite UI interactive logic.
