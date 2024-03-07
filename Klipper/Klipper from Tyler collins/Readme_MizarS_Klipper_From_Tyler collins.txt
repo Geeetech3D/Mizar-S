@@ -1,0 +1,32 @@
+Changes:
+
+- Add optional [include mainsail.cfg] on line 1
+- Change probe sample tolerange exceed retry count to 4 from 2 for better accuracy on line 42
+- Change Safe Z Home XY Position to -5.5,-5.5 on line 49.
+- Change home speed to 80 from 50 - saves time, line 50
+- Change bed_mesh travel speed to 80 from 50 - saves time, line 56
+- Added new line under bed_mesh for specifying algorithm - enables users to optionally use 7x7 and higher bed meshes.
+- Increased bed mesh minimum and maximum probe range for higher accuracy from XY 50-230 to XY 5-250. Lines 58, 59.
+- Increased default bed_mesh probe count to 4x4 from 3x3 to match accuracy and settings of default Mizar firmware. Line 60.
+- Fixed invalid endstop position for stepper X. Stepper is located at -10.5mm, not 0 (0 is left-edge of bed). Line 84.
+- Added new line under stepper_x specifying minimum movement position to allow movement to -10.5mm where end switch X located.
+- Fixed inverted endstop_pin setting for stepper Y causing erroneous TRIGGERED state when not triggered. Line 94.
+- Fixed invalid endstop position for stepper Y. Stepper is located at -6.5mm, not 0 (0 is front-edge of bed). Line 95.
+- Added new line under stepper_y specifying minimum movement position to allow movement to -6.5mm where end switch Y located.
+- Fixed invalid endstop position for stepper Z. Stepper is located at -1.7mm, not 0 (0 is surface of bed). Line 107.
+- Added optional line to stepper_z and stepper_z1 (commented out by default) to provide optional probe-endstop instead of switch.
+- Adjusted default pressure advance value to 0.60. Old default (0.12) aggressively low and only suitable for direct drive. Line 150.
+- Fixed erroneous PRINT_START macro which included a very bad G32 command. Comment said "home all axes" however it would instead initiate a full bed-mesh calibration while the nozzle was at full temperature, which can and will damage the hotbed. Changed PRINT_START G32 command to G28 to home all axes instead without initiating bed mesh calibration. Line 302.
+- Added new macro directly copied from CURA to perform a purge line. Added in macro section.
+- Added section containing pertinent and otherwise critical information at top.
+- Added section for loading pre-compiled firmware to printer from Github.
+- Adjusted wording in comments throughout to improve clarity.
+- Added new comments throughout config file to indicate functions and good-and-bad practices.
+- Removed unecessary lines of information.
+- Moved helpful information around to make it easier to read.
+- Added large section headers and divisions between sections to improve readability and ease of finding critical sections.
+- Added important information to individual sections regarding what is or isn't safe to change, and what must be changed if other areas are changed.3.
+- Added additional context for existing options to improve user understanding.
+- Added a troubleshooting section to fix common issues that aren't the direct result of a bad printer.cfg file.
+- Added attribution for changes to the document
+- Added a link to ellis3DP pressure advance config guide in extruder section

@@ -1,0 +1,479 @@
+##################################################################
+# Printer Configuration for Klipper.
+# For use with Geeetech Mizar S Only.
+# Config v2.0 by IDE_IS_LIFE.
+##################################################################
+
+
+##################################################################
+# VERY IMPORTANT INFORMATION!:
+##################################################################
+# 1: Please uncomment / remove "#" from either [include mainsail.cfg] or [include fluidd.cfg] below depending on which one you use.
+# [include mainsail.cfg]
+# [include fluidd.cfg]
+
+# 2: You must rename this file to printer.cfg - Linux' file system is case sensitive. It must be all lower-case. Then, replace the
+# printer.cfg file that was provided with your installation of Klipper + Fluidd or Mainsail with this one.
+
+# 3: This is CRITICAL to avoid damaging your build surface! NEVER *EVER* initiate bed mesh calibration while the nozzle is above 120 degrees Celcius.
+# Doing so will cause your nozzle to repeatedly melt a series of holes into your build surface.
+
+
+##################################################################
+# SECTION 2 - TROUBLESHOOTING:
+##################################################################
+# E1: If you're getting errors related to "Virtual_SDCard" file location, check line 224 and ensure the directory specified is correct.
+
+# E2: If you get an error about "can't connect to MCU", unplug and replug USB cable from printer. If that doesn't work, then from Klipper
+# computers' terminal window run the command "service klipper restart", then unplug and replug cable again. Then try restart klipper from web page.
+# Please note that the Geeetech Mizar S uses serial path "serial: /dev/ttyUSB0". Some installations of linux like Mint may need tweaks for this to
+# work as Linux sometimes has functions that can interfere with ttyUSB0.
+
+# E3: If it seems bed mesh is being ignored, ensure that mesh has been loaded. It tends to unload after a restart. Also, you must still perform Z
+# offset check after bed mesh.
+
+# E4: If your stepper motors run in the wrong direction, or an endstop is triggered when it shouldn't be, check "dir_pin" and "endstop_pin". Add 
+# or remove a ! before pin code to change the default value to opposite. For example, "dir_pin: PA1" to "dir_pin: !PA1" will reverse direction.
+# Changing "endstop_pin" will change whether it is triggered or open by default. If your wiring is backwards on your sensor / motor, this is an easy fix.
+
+# E5: Print erroneously pauses itself from time to time half-way through the purge line - I don't know the root cause. This happened a lot less though when I
+# removed "M2012" led command from Cura Gcode start on Mizar S profile.
+
+
+##################################################################
+# SECTION 3 - OPTION 1: FLASHING THE PRE-COMPILED FIRMWARE:
+##################################################################
+# This section covers flashing the pre-compiled firmware provided by Geeetech for the Mizar S.
+# Pre-compiled firmware: https://github.com/Geeetech3D/Mizar-S/tree/main/Klipper/BIN
+# To flash Klipper to Mizar S, paste "GTM32Source.bin" to root of SD. Power printer on, wait for "Download finished". Turn printer off, remove SD.
+# LCD WILL BE OFF - KLIPPER DOES NOT SUPPORT INTERNAL LCD DISPLAYS, THIS IS NORMAL.
+
+
+##################################################################
+# SECTION 3 - OPTION 2: COMPILING AND FLASHING FIRMWARE FROM SOURCE:
+##################################################################
+# These instructions apply only if you do not use the pre-compiled firmware provided on the Github page for the Mizar S.
+# This file contains common pin mappings for the Geeetech Mizar_S board.
+# To use this config, the firmware should be compiled for the
+# STM32F103 with a "28KiB bootloader" and USB communication.
+# Select "Disable SWD at startup (for GigaDevice stmf32f103 clones)"
+# The "make flash" command does not work on the Geeetech Mizar_S board. Instead,
+# after running "make", copy the generated "out/klipper.bin" file to a
+# file named "GTM32Source.bin" on an SD card and then restart the board with that SD card.
+# wait for "download finished" to appear, then power off printer and remove SD card.
+# LCD WILL BE OFF - KLIPPER DOES NOT SUPPORT INTERNAL LCD DISPLAYS, THIS IS NORMAL.
+
+
+##################################################################
+# SECTION 4 - GENERAL PRINTER CONFIGURATION:
+##################################################################
+[mcu]
+# This section handles setting up serial communications. Don't change it.
+serial: /dev/ttyUSB0
+restart_method: command
+
+
+##################################################################
+[printer]
+# This section handles default acceleration values.
+kinematics: cartesian
+max_velocity: 200
+max_accel: 3000
+max_z_velocity: 5
+max_z_accel: 100
+
+
+##################################################################
+[bltouch]
+# While the Geeetech Mizar S doesn't use "BL Touch" per-se, its compatible. 
+# The Mizar S specifically uses what's called a "Load Cell" or "Strain Gauge Sensor". 
+# Do not tweak XYZ Offsets or pin_up_reports.
+sensor_pin: ^PC4
+control_pin: PA8
+x_offset: 0
+y_offset: 0
+z_offset: 0
+samples: 2
+sample_retract_dist: 2.0
+lift_speed: 5
+samples_result: average
+samples_tolerance: 0.100
+samples_tolerance_retries: 4
+pin_up_reports_not_triggered: FALSE
+pin_up_touch_mode_reports_triggered: FALSE
+
+
+##################################################################
+[safe_z_home]
+# This section handles where to position X, Y axes before initiating Z homing.
+# If you plan to use BL Touch as endstop, change "home_xy_position" to 127.5,127.5 (center of build plate).
+# Be very careful with changing this setting. If you don't set up endstop_z and endstop_z1 correct, you will crash the nozzle into the bed aggressively.
+
+home_xy_position: -5.5,-5.5
+speed: 80
+z_hop: 10
+z_hop_speed: 5
+
+
+##################################################################
+[bed_mesh]
+# This section handles how Klipper calculated your ABL / Bed Mesh probing. 
+# Mesh Min and Max adjusts how close to the borders it will probe. Probe count is how many times it will probe on X and Y axis.
+# Higher values take longer but provide more detailed measurements.
+# If you need to do a 7x7 or higher probe count, un-comment "algorithm: bicubic". If doing 6x6 or less, leave it commented for default lagrange algorithm.
+
+speed: 80
+horizontal_move_z: 5
+mesh_min: 5, 5
+mesh_max: 250, 250
+probe_count: 4,4
+fade_start: 1
+fade_end: 10
+#algorithm: bicubic
+
+
+##################################################################
+[filament_motion_sensor Filament_Sensor]
+#IMPORTANT. If using the filament sensor add CLEAR_PAUSE to your slicer's start gcode or to your print start macro.
+#The act of loading and unloading filament will trigger a paused state.
+
+detection_length: 7.0
+extruder: extruder
+switch_pin: !PA11
+pause_on_runout: FALSE
+runout_gcode: PAUSE
+
+
+#########################################################
+# STEPPER MOTOR CONFIGURATION:
+#########################################################
+
+[stepper_x]
+# If rotation calibration needed, see https://3dprintbeginner.com/rotation-distance-calculator/
+
+step_pin: PC3
+dir_pin: !PC2   
+enable_pin: !PA0
+microsteps: 16
+rotation_distance: 40
+endstop_pin: !PB4
+position_endstop: -10.5
+position_min: -10.5
+position_max: 255
+homing_speed: 25
+
+
+##################################################################
+[stepper_y]
+# If rotation calibration needed, see https://3dprintbeginner.com/rotation-distance-calculator/
+
+step_pin: PA2
+dir_pin: PA1
+enable_pin: !PC13
+microsteps: 16
+rotation_distance: 40
+endstop_pin: PB3
+position_endstop: -6.5
+position_min: -6.5
+position_max: 255
+homing_speed: 30
+
+
+##################################################################
+[stepper_z]
+# If you choose to switch to BL Touch for Endstop instead of default Z switch, add # to "endstop_pin: PD6"
+# and then un-comment "endstop_pin: probe:z_virtual_endstop". Also go back up to and then change values for section [safe_z_home].
+# Then, check stepper_z1 as well for more instructions. Important as there are 2 Z Endstops due to Mizar S having dual Z motors.
+# If rotation calibration needed, see https://3dprintbeginner.com/rotation-distance-calculator/
+
+step_pin: PE5
+dir_pin: PE6
+enable_pin: !PA3   
+microsteps: 16
+rotation_distance: 8      
+position_min: -1.7
+position_max: 260
+#position_endstop: -1.7
+#endstop_pin: probe:z_virtual_endstop
+endstop_pin: PD6
+
+
+##################################################################
+[stepper_z1]
+# If you choose to switch to BL Touch for Endstop instead of default Z switch, add # to "endstop_pin: PD3"
+# and then un-comment "endstop_pin: probe:z_virtual_endstop". Also go back up to and then change values for section [safe_z_home].
+# If rotation calibration needed, see https://3dprintbeginner.com/rotation-distance-calculator/
+
+step_pin: PA6
+dir_pin: PA5
+enable_pin: !PA7  
+microsteps: 16
+rotation_distance: 8
+#endstop_pin: probe:z_virtual_endstop
+endstop_pin: PD3
+
+###################################################
+# HEATER CONFIGURATION:
+###################################################
+
+[extruder]
+# To test configure pressure advance, please follow the instructions at https://ellis3dp.com/Print-Tuning-Guide/articles/pressure_linear_advance/pattern_method.html
+# If you have issues with this test, re-read and re-read and re-read the values again. It's extremely easy to misread the dozens of custom values.
+
+step_pin: PB8
+dir_pin: PE4
+enable_pin: !PB7
+microsteps: 16
+
+instantaneous_corner_velocity: 0.500
+max_extrude_only_velocity:35
+max_extrude_only_accel:3500
+
+rotation_distance: 7
+#rotation_distance: 23.18840579710145
+#rotation_distance = <full_steps_per_rotation> * <microsteps> / <steps_per_mm> or
+#rotation_distance = <full_steps_per_rotation> * <microsteps> * <step_distance>
+
+
+nozzle_diameter: 0.400
+filament_diameter: 1.750
+heater_pin: PB9
+sensor_type: EPCOS 100K B57560G104F
+sensor_pin: PC1
+control: pid
+pid_Kp: 19.479
+pid_Ki: 1.073
+pid_Kd: 88.385
+min_temp: 0
+max_temp: 250
+pressure_advance: 0.60
+pressure_advance_smooth_time: 0.040
+
+
+[heater_bed]
+heater_pin: PE0
+sensor_type: EPCOS 100K B57560G104F
+sensor_pin: PC0
+control: pid
+pid_Kp: 62.673
+pid_Ki: 1.530
+pid_Kd: 641.619
+min_temp: 0
+max_temp: 130
+
+#########################################
+# FANS CONFIGURATION:
+#########################################
+
+[heater_fan Hotend]
+heater: extruder
+pin: PE1
+heater_temp: 50.0
+
+#[fan]
+#pin: PE1
+#pin: PD6
+
+
+###############################################
+# LCD CONFIGURATION:
+###############################################
+# So far as I know, LCD doesn't work with Mizar S on Klipper as of February of 2024.
+
+;[board_pins]
+;[display]
+;lcd_type: st7920
+;cs_pin: PA5                
+;sclk_pin: PB1            
+;sid_pin: PA6             
+#encoder_pins:  ^PA3, ^PA2 
+;click_pin: ^!PB0        
+
+[output_pin beeper]
+pin: PC5
+pwm: True
+value: 0
+shutdown_value: 0
+cycle_time: 0.001
+scale: 1
+[gcode_macro M300]
+gcode:
+  {% set S = params.S|default(1000)|int %} ; S sets the tone frequency
+  {% set P = params.P|default(100)|int %} ; P sets the tone duration
+  {% set L = 0.5 %} ; L varies the PWM on time, close to 0 or 1 the tone gets a bit quieter. 0.5 is a symmetric waveform
+  {% if S <= 0 %} ; dont divide through zero
+  {% set F = 1 %}
+  {% set L = 0 %}
+  {% elif S >= 10000 %} ;max frequency set to 10kHz
+  {% set F = 0 %}
+  {% else %}
+  {% set F = 1/S %} ;convert frequency to seconds
+  {% endif %}
+    SET_PIN PIN=beeper VALUE={L} CYCLE_TIME={F} ;Play tone
+  G4 P{P} ;tone duration
+    SET_PIN PIN=beeper VALUE=0
+
+###############################################
+# GCODE VIRTUAL_SDCARD LOCATION:
+###############################################
+[virtual_sdcard]
+# Change the "path" directory to the default for your setup. Below is the default most people use. Make sure to change USERNAME_HERE to your username.
+# Linux is case sensitive, so keep that in mind. By default for Raspberry Pi, the username is pi.
+
+path: /home/USERNAME_HERE/printer_data/gcodes
+
+###############################################
+# MACRO CONFIGURATION:
+###############################################
+[pause_resume]
+
+[gcode_macro PAUSE]
+description: Pause the actual running print
+rename_existing: PAUSE_BASE
+# change this if you need more or less extrusion
+variable_extrude: 1.0
+gcode:
+  ##### read E from pause macro #####
+  {% set E = printer["gcode_macro PAUSE"].extrude|float %}
+  ##### set park positon for x and y #####
+  # default is your max posion from your printer.cfg
+  {% set x_park = printer.toolhead.axis_maximum.x|float - 5.0 %}
+  {% set y_park = printer.toolhead.axis_maximum.y|float - 5.0 %}
+  ##### calculate save lift position #####
+  {% set max_z = printer.toolhead.axis_maximum.z|float %}
+  {% set act_z = printer.toolhead.position.z|float %}
+  {% if act_z < (max_z - 2.0) %}
+      {% set z_safe = 2.0 %}
+  {% else %}
+      {% set z_safe = max_z - act_z %}
+  {% endif %}
+  ##### end of definitions #####
+  PAUSE_BASE
+  G91
+  {% if printer.extruder.can_extrude|lower == 'true' %}
+    G1 E-{E} F2100
+  {% else %}
+    {action_respond_info("Extruder not hot enough")}
+  {% endif %}
+  {% if "xyz" in printer.toolhead.homed_axes %}
+    G1 Z{z_safe} F900
+    G90
+    G1 X{x_park} Y{y_park} F6000
+  {% else %}
+    {action_respond_info("Printer not homed")}
+  {% endif %} 
+
+[gcode_macro RESUME]
+description: Resume the actual running print
+rename_existing: RESUME_BASE
+gcode:
+  ##### read E from pause macro #####
+  {% set E = printer["gcode_macro PAUSE"].extrude|float %}
+  #### get VELOCITY parameter if specified ####
+  {% if 'VELOCITY' in params|upper %}
+    {% set get_params = ('VELOCITY=' + params.VELOCITY)  %}
+  {%else %}
+    {% set get_params = "" %}
+  {% endif %}
+  ##### end of definitions #####
+  {% if printer.extruder.can_extrude|lower == 'true' %}
+    G91
+    G1 E{E} F2100
+  {% else %}
+    {action_respond_info("Extruder not hot enough")}
+  {% endif %}  
+  RESUME_BASE {get_params}
+
+[gcode_macro CANCEL_PRINT]
+description: Cancel the actual running print
+rename_existing: CANCEL_PRINT_BASE
+gcode:
+  TURN_OFF_HEATERS
+  CANCEL_PRINT_BASE
+  G91
+  G1 Z10 F3000
+  G90
+
+[led GT_led]
+green_pin:PE2
+cycle_time: 1
+initial_GREEN: 0.5
+   
+[input_shaper]
+shaper_freq_x: 53  # frequency for the X mark of the test model
+shaper_freq_y: 45  # frequency for the Y mark of the test model
+shaper_type: mzv
+
+[gcode_macro PRINT_START]
+#   Use PRINT_START for the slicer starting script - please customise for your slicer of choice
+gcode:
+    G28                            ; home all axes
+    G1 Z10 F3000                   ; move nozzle away from bed
+    BED_MESH_PROFILE LOAD="default" ; load default bed mesh profile
+
+[gcode_macro PURGE_LINE]
+gcode:
+  G92 E0 ; Reset Extruder
+  M107 P0 ;Off Main Fan
+  M107 P1 ;Off Aux Fan
+;M106 P0 S383 ; ON MainFan 150% if need
+;M106 P1 S255 ; ON Aux Fan 100% if need
+  G1 Z5.0 F3000 ;Move Z Axis up little to prevent scratching of Heat Bed
+  G1 X0.2 Y20 Z0.8 F5000 ; Move to start position
+  G1 X0.2 Y200.0 Z1.0 F1500 E30 ; Draw the first line
+  G92 E0 ; Reset Extruder
+  G1 X0.5 Y200.0 Z1.2 F3000 ; Move to side a little
+  G1 X0.5 Y20 Z1.2 F1500 E25 ; Draw the second line
+  G92 E0 ; Reset Extruder
+  G1 Z2.0 F3000 ; Move Z Axis up little to prevent scratching of Heat Bed
+  G1 X5 Y20 Z0.2 F3000.0 ; Scrape off nozzle residue
+  M83
+  G1 E-5.5 F300
+  G28 ; Home all axes
+
+[gcode_macro G32]
+gcode:
+    BED_MESH_CLEAR
+    G28
+    BED_MESH_CALIBRATE
+    ;QUAD_GANTRY_LEVEL    ;原voron使用
+
+[gcode_macro G29]
+gcode:
+    G28
+    BED_MESH_PROFILE LOAD="default"
+
+##################################################################
+# DOCUMENT ATTRIBUTION: CFG by IDE_IS_LIFE.
+##################################################################
+# This configuration file is based on an original CFG provided by Geeetech on their github page from 2023.
+# The original config had a long list of significant issues that caused me over a month of headaches due to having clearly been untested by Geeetech, so I
+# (IDE_IS_LIFE) have spent a long time working to improve it in order to try and facilitate a better user experience for other Mizar S owners out there.
+# I hope this helps you out! Good and reliable resources can help small communities become larger and stronger!
+
+
+#*# <---------------------- SAVE_CONFIG ---------------------->
+#*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
+#*#
+#*# [bltouch]
+#*#
+#*# [stepper_z]
+#*# position_endstop = -0.551
+#*#
+#*# [bed_mesh default]
+#*# version = 1
+#*# points =
+#*# 	  -0.407250, -0.439750, -0.404750, -0.282250
+#*# 	  -0.191000, -0.116000, -0.002250, 0.105250
+#*# 	  -0.262250, -0.024750, 0.054000, 0.100250
+#*# 	  -0.626000, -0.298500, -0.148500, -0.153500
+#*# x_count = 4
+#*# y_count = 4
+#*# mesh_x_pps = 2
+#*# mesh_y_pps = 2
+#*# algo = lagrange
+#*# tension = 0.2
+#*# min_x = 5.0
+#*# max_x = 249.97
+#*# min_y = 5.0
+#*# max_y = 249.97
