@@ -1,7 +1,7 @@
 ##################################################################
 # Printer Configuration for Klipper.
 # For use with Geeetech Mizar S Only.
-# Config v2.0 by IDE_IS_LIFE.
+# Config v2.2 by IDE_IS_LIFE.
 ##################################################################
 
 
@@ -265,13 +265,13 @@ max_temp: 130
 # FANS CONFIGURATION:
 #########################################
 
-[heater_fan Hotend]
-heater: extruder
-pin: PE1
-heater_temp: 50.0
-
-#[fan]
+#[heater_fan Hotend]
+#heater: extruder
 #pin: PE1
+#heater_temp: 50.0
+
+[fan]
+pin: PE1
 #pin: PD6
 
 
@@ -399,10 +399,10 @@ green_pin:PE2
 cycle_time: 1
 initial_GREEN: 0.5
    
-[input_shaper]
-shaper_freq_x: 53  # frequency for the X mark of the test model
-shaper_freq_y: 45  # frequency for the Y mark of the test model
-shaper_type: mzv
+#[input_shaper]
+#shaper_freq_x:   # frequency for the X mark of the test model
+#shaper_freq_y:   # frequency for the Y mark of the test model
+#shaper_type: ei
 
 [gcode_macro PRINT_START]
 #   Use PRINT_START for the slicer starting script - please customise for your slicer of choice
